@@ -13,21 +13,12 @@ listlist = [];#列中列 list[list[songName --singer]]
 global SONGCOUNT #音乐总数
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument('--headless')
-browser = webdriver.Chrome()
+browser = webdriver.Chrome("/usr/local/bin/chromedriver")
 #browser = webdriver.Chrome(chrome_options=chrome_options)#可用参数，chrome设置为不可见
 def init(Uusername,Ppassword):
-    browser.get("https://y.qq.com/portal/search.html#page=1&searchid=1&remoteplace=txt.yqq.top&t=song&w=%E5%95%8A");
-    next = browser.find_elements(By.CLASS_NAME, 'top_login__link')[1]
-    next.send_keys(Keys.RETURN);
-    browser.switch_to.frame('frame_tips')
-    login_s = browser.find_element(By.ID, 'switcher_plogin')
-    login_s.send_keys(Keys.RETURN);
-    username = browser.find_elements(By.CLASS_NAME, 'inputstyle')[0]
-    password = browser.find_elements(By.CLASS_NAME, 'inputstyle')[1]
-    username.send_keys(Uusername)
-    password.send_keys(Ppassword)
-    login = browser.find_element(By.ID, 'login_button');
-    login.send_keys(Keys.RETURN);
+    #browser.get("https://y.qq.com/portal/search.html#page=1&searchid=1&remoteplace=txt.yqq.top&t=song&w=%E5%95%8A");
+    browser.get("https://y.qq.com/")
+    
     time.sleep(5)
     return browser
 def gotoQQMusic(MusicList,browser):
@@ -92,11 +83,13 @@ def get163MusicURL(url ,flag): #获取用户歌单
         browser.get(url)
     browser.switch_to.frame('contentFrame')
     cBox = browser.find_element(By.ID,'cBox').find_elements(By.CLASS_NAME,'msk')
-
-    for c in cBox:
-        musicTitle.append(c.get_attribute('title'))#n
-        musicURL.append(c.get_attribute('href'))#n
-        print('已经找到歌单：'+c.get_attribute('title'))
+    print (cBox)
+    # exit()
+    #for c in cBox:
+    c=cBox[2]
+    musicTitle.append(c.get_attribute('title'))#n
+    musicURL.append(c.get_attribute('href'))#n
+    print('已经找到歌单：'+c.get_attribute('title'))
     #musicURLdict.fromkeys(titleList,musicURlList)
     flag = input('是否开始爬取 是 ：1 否：0')
     if flag=='1':
@@ -142,10 +135,32 @@ if __name__ == '__main__':
     isName(Lname)
     # for i in listlist:
     #     gotoQQMusic(i)#传入列表
-    initval = init(username,password)
-    
+    # initval = init(username,password)
+    browser.get("https://y.qq.com/")
+    # print(listlist)
     for  list in listlist:
-        gotoQQMusic(list,initval)  # 传入列表
+        # gotoQQMusic(list,initval)  # 传入列表
+        for name in list:
+            try:
+                print(name)
+                id_songtext = browser.find_elements(By.CLASS_NAME, 'search_input__input')[0];
+                # print(id_songtext)
+                # list.reverse();
+                id_songtext.clear()
+                id_songtext.send_keys(name)
+                serach_btn = browser.find_elements(By.CLASS_NAME, 'search_input__btn')[0]
+                serach_btn.send_keys(Keys.ENTER)
+                time.sleep(1)
+                list_menu__icon_add = browser.find_elements(By.CLASS_NAME, 'list_menu__add')[0];
+                list_menu__icon_add.send_keys(Keys.RETURN);
+                time.sleep(1)
+                myLike = browser.find_elements(By.CLASS_NAME,"js_addto_taogelist")[1]
+                time.sleep(1)
+                myLike.send_keys(Keys.RETURN)
+                print('添加'+name+'成功')
+            except Exception as e:
+                print(e)
+                # continue
     # getMusicList()
     # input = input(str);
     # if input == '1':
